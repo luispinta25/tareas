@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Práctica - Auditoría - Luis Pinta</title>
+    <!-- Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Configuración General de la Página para Impresión (Normas APA/Institucionales) --- */
+        @page {
+            size: A4 portrait;
+            margin: 2cm 2cm 2cm 2.54cm;
+        }
+
+        /* --- Estilos Generales del Cuerpo del Documento --- */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 13pt;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* --- Estructura y Contenedores --- */
+        .caratula {
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-after: always;
+        }
+
+        .contenido {
+            padding: 1cm 0;
+        }
+
+        .footer-caratula {
+            text-align: center;
+            padding-bottom: 1cm;
+        }
+        
+        /* --- Elementos de la Carátula --- */
+        .logo {
+            margin: 1cm auto;
+            max-width: 180px;
+        }
+
+        .titulo-principal {
+            margin: 1cm 0;
+        }
+
+        .datos-estudiante {
+            margin: 1cm 0;
+            line-height: 2;
+        }
+
+        .datos-estudiante p {
+            text-align: center;
+            margin: 0.5cm 0;
+        }
+        
+        /* --- Títulos y Párrafos (Jerarquía y Estilos) --- */
+        h1, h2, h3, h4, h5 {
+            color: #16275e;
+            font-weight: bold;
+            page-break-after: avoid;
+        }
+
+        h1 {
+            font-size: 19pt;
+            margin-bottom: 1cm;
+        }
+
+        h2 {
+            font-size: 17pt;
+            margin-top: 1.5cm;
+            margin-bottom: 0.8cm;
+        }
+
+        h3 {
+            font-size: 15pt;
+            margin-top: 1cm;
+            margin-bottom: 0.5cm;
+        }
+        
+        h4 {
+            font-size: 14pt;
+            margin-top: 0.8cm;
+            margin-bottom: 0.4cm;
+        }
+
+        p {
+            text-align: justify;
+            margin-top: 0;
+            margin-bottom: 0.5cm;
+            orphans: 3;
+            widows: 3;
+        }
+
+        /* --- Botones Flotantes (Navegación) --- */
+        .btn-flotante {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn-nav {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: #16275e;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn-nav:hover {
+            transform: scale(1.1);
+            background: #9a7c00;
+        }
+
+        @media print {
+            .btn-flotante {
+                display: none !important;
+            }
+        }
+
+        /* --- Listas --- */
+        ul, ol {
+            margin-bottom: 0.5cm;
+            padding-left: 1.5cm;
+        }
+
+        li {
+            color: #9a7c00;
+            margin-bottom: 0.4cm;
+            padding-left: 0.5cm;
+            text-align: justify;
+        }
+
+        li span {
+            color: #333;
+        }
+        
+        .strong {
+            font-weight: bold;
+        }
+
+        /* --- Tablas --- */
+        .tabla-moderna {
+            border-collapse: separate; /* Cambiado a separate para permitir border-radius */
+            border-spacing: 0;
+            width: 100%;
+            margin: 0.5cm 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+            page-break-inside: auto;
+        }
+
+        .tabla-moderna th {
+            background: #16275e;
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+            border: none;
+        }
+
+        .tabla-moderna td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+            border-left: 1px solid #eee;
+            text-align: justify;
+            vertical-align: top;
+        }
+
+        .tabla-moderna td:first-child {
+            border-left: none;
+        }
+
+        .tabla-moderna tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Fuerza la repetición del encabezado en cada página impresa */
+        thead {
+            display: table-header-group;
+        }
+
+        /* Evita que una fila se parta a la mitad, pero permite que la tabla fluya */
+        tr {
+            page-break-inside: avoid;
+        }
+
+        .tabla-moderna tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* --- Botones Flotantes (Solo Pantalla) --- */
+        .btn-flotante {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 9999;
+        }
+
+        .btn-nav {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            border: none;
+            background: #16275e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            text-decoration: none;
+            font-size: 22px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: #9a7c00;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Ocultar elementos al imprimir */
+        @media print {
+            .btn-flotante {
+                display: none !important;
+            }
+        }
+
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        const AUTH_KEY = '1727652107';
+        
+        (function securityCheck() {
+            const params = new URLSearchParams(window.location.search);
+            const isOwner = params.get('owner') === AUTH_KEY || sessionStorage.getItem('isOwner') === 'true';
+
+            if (!isOwner) {
+                document.addEventListener('contextmenu', e => e.preventDefault());
+                document.addEventListener('keydown', e => {
+                    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+                
+                // Modo espectador: Ocultar botón Home
+                window.addEventListener('load', () => {
+                    const homeLink = document.querySelector('a.btn-nav');
+                    if (homeLink) homeLink.style.display = 'none';
+                });
+
+                document.body.style.userSelect = 'none';
+                document.body.style.webkitUserSelect = 'none';
+            } else {
+                // Es Dueño: Actualizar link
+                window.addEventListener('load', () => {
+                    const homeLink = document.querySelector('a.btn-nav');
+                    if (homeLink) {
+                        const url = new URL(homeLink.href, window.location.origin + window.location.pathname);
+                        url.searchParams.set('owner', AUTH_KEY);
+                        homeLink.href = url.pathname + url.search;
+                    }
+                });
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="btn-flotante">
+        <a href="../../../index.html" class="btn-nav" title="Regresar al Inicio">
+            <i class="fas fa-home"></i>
+        </a>
+        <button onclick="window.print()" class="btn-nav" title="Imprimir PDF">
+            <i class="fas fa-print"></i>
+        </button>
+    </div>
+    <div class="caratula">
+        <div>
+            <h1>INSTITUTO SUPERIOR TECNOLÓGICO MEJÍA</h1>
+            <img 
+                src="https://i.postimg.cc/02MXy6SH/channels4-profile-1.jpg" 
+                alt="Logo del Instituto" 
+                class="logo">
+            
+            <div class="titulo-principal">
+                <h2>AUDITORÍA</h2>
+                <h3>EVALUACIÓN PRÁCTICA: PROCESOS DE AUDITORÍA Y ÉTICA DEL AUDITOR</h3>
+            </div>
+            
+            <div class="datos-estudiante">
+                <p><strong>Estudiante:</strong> Luis Pinta</p>
+                <p><strong>Nivel:</strong> Cuarto (Intensivo)</p>
+                <p><strong>Docente:</strong> Mgtr. Zumárraga Martínez Andrea Fernanda</p>
+                <p><strong>Fecha:</strong> 05 de febrero de 2026</p>
+            </div>
+        </div>
+        
+        <div class="footer-caratula">
+            <p>Machachi - Ecuador</p>
+            <p>2026</p>
+        </div>
+    </div>
+    
+    <div class="contenido">
+        <h2>Actividad 1: Procesos de Auditoría</h2>
+        <p>
+            En mi opinión, el proceso de auditoría destaca por ser una secuencia bien estructurada y lógica que ayuda muchísimo a evaluar el cumplimiento de cualquier organización. Se basa en un modelo que prioriza el orden y la transparencia, algo que considero fundamental para una gestión profesional en el cantón Mejía. A continuación, detallo las etapas de este proceso, tomando como referencia operativa a la Caja de Ahorro "Tupak Rantina" ubicada en Machachi:
+        </p>
+
+        <table class="tabla-moderna">
+            <thead>
+                <tr>
+                    <th>Etapa</th>
+                    <th>Finalidad</th>
+                    <th>Ejemplo Aplicado a Tupak Rantina</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="strong">Planificación</td>
+                    <td>Establecer la estrategia global, determinar el alcance y ver qué recursos vamos a necesitar para que la revisión sea efectiva.</td>
+                    <td>El auditor define que el enfoque de este trimestre en la sede de Machachi será revisar los expedientes de microcréditos para socios de zonas rurales de la provincia de Pichincha.</td>
+                </tr>
+                <tr>
+                    <td class="strong">Ejecución</td>
+                    <td>Recopilar toda la evidencia necesaria para sustentar los hallazgos, haciendo pruebas de campo que nos den seguridad sobre la información.</td>
+                    <td>Se realiza una verificación física y digital de las garantías prendarias y documentos de soporte de los créditos otorgados el último mes.</td>
+                </tr>
+                <tr>
+                    <td class="strong">Comunicación de Resultados</td>
+                    <td>Informar de manera clara y técnica a la alta gerencia o directiva sobre qué se encontró y qué recomendaciones debemos seguir.</td>
+                    <td>Se emite el informe oficial detallando hallazgos en la gestión de crédito ante el Consejo de Administración de la Caja, discutiendo los puntos clave con la gerencia.</td>
+                </tr>
+                <tr>
+                    <td class="strong">Seguimiento</td>
+                    <td>Verificar que realmente la organización haya implementado las medidas correctivas sugeridas para mejorar los procesos internos.</td>
+                    <td>El auditor comprueba si se implementaron las mejoras en el sistema de calificación de riesgos que se recomendaron en la auditoría anterior.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Actividad 2: Ética del Auditor</h2>
+        <h3>2.1. ¿Qué se entiende por ética del auditor?</h3>
+        <p>
+            Para mí, la ética del auditor es realmente el corazón de su trabajo. Yo he llegado a la conclusión de que no se trata solo de seguir reglas, sino de actuar con una integridad que sea notoria para todos. En cualquier organización, sea pública o privada, la ética asegura que el auditor realice su trabajo con honestidad y total transparencia, sin inclinarse por intereses particulares, garantizando que la información sea confiable para la toma de decisiones.
+        </p>
+
+        <h3>2.2. Principios Éticos del Auditor</h3>
+        <ul>
+            <li><span><strong class="strong">Integridad:</strong> El auditor debe ser recto y honesto en todas sus relaciones profesionales. Definitivamente, un auditor sin integridad no tiene cabida en una institución sólida en nuestro país.</span></li>
+            <li><span><strong class="strong">Objetividad:</strong> Significa que no debe dejar que prejuicios o la influencia de terceros afecten su juicio profesional. Debe ver el panorama completo y ser justo con lo que reporta.</span></li>
+            <li><span><strong class="strong">Confidencialidad:</strong> Guardar el debido respeto por la propiedad de la información que recibe. No puede andar contando datos privados sin la autorización debida, algo que considero fundamental para mantener la fe pública.</span></li>
+            <li><span><strong class="strong">Competencia Profesional:</strong> Mantener el nivel de conocimiento necesario para asegurar un servicio de alta calidad. A día de hoy, las normativas de la Superintendencia en Ecuador cambian y el profesional debe estar al día.</span></li>
+        </ul>
+
+        <h3>2.3. ¿Por qué es fundamental la ética en la auditoría?</h3>
+        <p>
+            Sin duda alguna, la ética es fundamental porque es lo que sostiene la credibilidad de todo el proceso de auditoría. Si el auditor no actúa éticamente, entonces los informes no servirían para nada y se generaría una desorganización muy notoria. El contar con auditorías éticas permite que las organizaciones, tanto en el sector público como en instituciones como Tupak Rantina, crezcan con bases sólidas y generen confianza ante la sociedad y las autoridades.
+        </p>
+
+        <h3>2.4. Casos Prácticos de Conducta Ética</h3>
+        <p><strong class="strong">Ejemplo de conducta ética correcta:</strong></p>
+        <p>
+            Imagine que en la Caja de Ahorro Tupak Rantina descubrimos un error en el cálculo de intereses de un crédito de un directivo. El auditor, manteniendo su independencia, reporta el error de inmediato y pide que se corrija, a pesar de que el directivo es alguien con influencia jerárquica. Eso demuestra una atención profesional que prioriza la honestidad sobre cualquier presión.
+        </p>
+        <p><strong class="strong">Ejemplo de falta ética y consecuencias:</strong></p>
+        <p>
+            Supongamos que un auditor recibe un descuento especial o beneficio personal en un negocio local (como Ferresoluciones) a cambio de suavizar un informe sobre la falta de comprobantes de gastos en una entidad que está auditando. <br>
+            <strong class="strong">Consecuencias:</strong> Esto traería problemas graves. Si la entidad enfrenta problemas financieros por esos gastos no controlados, el auditor enfrentaría demandas legales, perdería su prestigio profesional en Machachi y sería sancionado por los organismos de control de Ecuador por haber traicionado la confianza pública.
+        </p>
+
+        <h2>Actividad 3: Reflexión Personal</h2>
+        <h3>¿Cómo influye la ética del auditor en la transparencia y credibilidad de una organización?</h3>
+        <p>
+            Desde mi punto de vista, la ética del auditor influye de manera determinante porque es el puente que conecta la gestión con la confianza de la gente. En comunidades rurales e indígenas, la transparencia es vital; si el auditor hace un trabajo ético, reduce considerablemente las barreras de acceso a la información y dignifica el servicio que recibimos. Realmente, cuando un auditor actúa con principios, nos ayuda a tener una visión integral de cómo estamos, permitiéndonos tomar decisiones acertadas para mejorar. He llegado a la conclusión de que un auditor ético no solo revisa números, sino que fortalece el tejido social de nuestra organización, haciendo que todos nos sintamos seguros de que nuestros ahorros y esfuerzos están bien cuidados. Aún a este momento, la ética sigue siendo la mejor herramienta para garantizar que una institución financiera comunitaria sea sólida y perdure en el tiempo.
+        </p>
+
+        <div class="referencias">
+            <h2>Referencias</h2>
+            <p>
+                Consejo de Normas Internacionales de Ética para Contadores. (2025). <em>Código de Ética para Profesionales de la Contabilidad</em>. IFAC.
+            </p>
+            <p>
+                Instituto Superior Tecnológico Mejía. (2026). <em>Manual de Procedimientos de Auditoría - Guía Académica</em>. Machachi, Ecuador.
+            </p>
+        </div>
+
+        <!-- Navegación Pública -->
+        <div class="no-print" style="margin-top: 50px; padding: 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif;">
+            <a href="../../../index.html?subject=auditoria" style="text-decoration: none; color: #16275e; font-weight: bold;">
+                <i class="fas fa-arrow-left"></i> Volver a Tareas de Auditoría
+            </a>
+            <a href="../Presentaciones/EVALUACION_PRACTICA.html" style="text-decoration: none; background: #16275e; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+                Ver Presentación <i class="fas fa-play"></i>
+            </a>
+        </div>
+    </div>
+    <style>
+        @media print { .no-print { display: none; } }
+    </style>
+</body>
+</html>

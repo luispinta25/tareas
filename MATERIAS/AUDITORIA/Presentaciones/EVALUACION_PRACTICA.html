@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Auditoría - Luis Pinta</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #d63031; /* Rojo elegante */
+            --dark: #121212;    /* Negro profundo */
+            --light: #ffffff;   /* Blanco puro */
+            --gray: #2d3436;
+            --accent: #ff7675;
+            --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            overflow: hidden; /* Para manejar el scroll por diapositivas */
+        }
+
+        /* --- Estructura de Slides --- */
+        .presentation-container {
+            height: 100vh;
+            width: 100vw;
+            perspective: 1500px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 2;
+        }
+
+        /* --- Fondo Decorativo --- */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(214, 48, 49, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 0, 0, 0.2) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        /* --- Elementos de Diseño --- */
+        .content-box {
+            max-width: 1000px;
+            width: 100%;
+            position: relative;
+        }
+
+        .accent-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--primary);
+            margin-bottom: 2rem;
+            border-radius: 3px;
+        }
+
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .slide-title {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .slide-subtitle {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .text-body {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        /* --- Grid de Características --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 2rem;
+            transition: var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            background: rgba(214, 48, 49, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            display: block; /* Asegura que se comporte como bloque */
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            min-height: 2.5rem; /* Reserva el espacio */
+        }
+
+        /* --- Controles --- */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--light);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            z-index: 101;
+        }
+
+        /* --- Botón Home (Exclusivo para Luis Pinta) --- */
+        .home-btn {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            color: var(--light);
+            font-size: 1.5rem;
+            text-decoration: none;
+            z-index: 100;
+            transition: var(--transition-fast);
+        }
+
+        .home-btn:hover {
+            color: var(--primary);
+            transform: rotate(15deg);
+        }
+
+        /* --- Animaciones de Entrada --- */
+        .animate-up {
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        .active .animate-up { 
+            animation: subtleFadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
+        }
+
+        .active .delay-1 { animation-delay: 0.15s; }
+        .active .delay-2 { animation-delay: 0.3s; }
+        .active .delay-3 { animation-delay: 0.45s; }
+        .active .delay-4 { animation-delay: 0.6s; }
+        .active .delay-5 { animation-delay: 0.75s; }
+
+        @keyframes subtleFadeUp {
+            from { opacity: 0; transform: translateY(10px); filter: blur(2px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .slide { padding: 2rem; }
+            .slide-title { font-size: 2.5rem; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-overlay"></div>
+    <canvas id="dotShaderCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
+    
+    <a href="../../../index.html?subject=auditoria" class="home-btn" title="Regresar al Inicio">
+        <i class="fas fa-house-chimney"></i>
+    </a>
+
+    <div class="presentation-container">
+        
+        <!-- SLIDE 1: PORTADA -->
+        <section class="slide active" id="slide-1">
+            <div class="content-box">
+                <div class="accent-bar animate-up"></div>
+                <h2 class="slide-subtitle animate-up delay-1">Auditoría Institucional</h2>
+                <h1 class="slide-title animate-up delay-2">Evaluación Práctica <br><span style="color:var(--primary)">2026</span></h1>
+                
+                <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+                    <div class="feature-card animate-up delay-3" style="flex: 1; border-left: 2px solid var(--primary); padding: 1rem;">
+                        <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem;">Etimología</h4>
+                        <p style="font-size: 0.85rem; line-height: 1.4;">Del latín <i>"audire"</i> (oír). Los primeros auditores juzgaban escuchando los relatos de cuentas de los tesoreros.</p>
+                    </div>
+                    <div class="feature-card animate-up delay-4" style="flex: 1; border-left: 2px solid var(--primary); padding: 1rem;">
+                        <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem;">Dato en Ecuador</h4>
+                        <p style="font-size: 0.85rem; line-height: 1.4;">La primera técnica de control en tierras ecuatorianas fue el <b>Quipucamayoc</b>. Usaban cuerdas de colores y nudos (Quipus) como un sistema contable de alta precisión para auditar censos y cosechas.</p>
+                    </div>
+                </div>
+
+                <div class="animate-up delay-5" style="margin-top: 2rem;">
+                    <p style="font-size: 1.1rem; font-weight: bold;">Estudiante: Luis Pinta</p>
+                    <p style="color: var(--primary); margin-top: 0.3rem;"><i class="fas fa-location-dot"></i> Machachi - Ecuador</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: PROCESOS -->
+        <section class="slide" id="slide-2">
+            <div class="content-box">
+                <div class="accent-bar animate-up"></div>
+                <h2 class="slide-subtitle animate-up delay-1">Ciclo de Control Técnico</h2>
+                <h1 class="slide-title animate-up delay-2" style="font-size: 3rem;">El Proceso de <span style="color:var(--primary)">Auditoría</span></h1>
+                
+                <div class="features-grid">
+                    <div class="feature-card animate-up delay-2">
+                        <i class="fas fa-chess-knight"></i>
+                        <h3>Planificación</h3>
+                        <p>Estrategia y alcance. <br><small>Ej: Enfoque en microcréditos rurales.</small></p>
+                    </div>
+                    <div class="feature-card animate-up delay-3">
+                        <i class="fas fa-microscope"></i>
+                        <h3>Ejecución</h3>
+                        <p>Evidencia y pruebas. <br><small>Ej: Verificación de garantías físicas.</small></p>
+                    </div>
+                    <div class="feature-card animate-up delay-4">
+                        <i class="fas fa-bullhorn"></i>
+                        <h3>Comunicación</h3>
+                        <p>Informe técnico. <br><small>Ej: Presentación ante el Consejo Administrativo y de Vigilancia.</small></p>
+                    </div>
+                    <div class="feature-card animate-up delay-5">
+                        <i class="fas fa-arrows-rotate"></i>
+                        <h3>Seguimiento</h3>
+                        <p>Mejora continua. <br><small>Ej: Control de medidas correctivas.</small></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: ÉTICA -->
+        <section class="slide" id="slide-3">
+            <div class="content-box">
+                <div class="accent-bar animate-up"></div>
+                <h2 class="slide-subtitle animate-up delay-1">Pilares del Comportamiento</h2>
+                <h1 class="slide-title animate-up delay-2" style="font-size: 2.5rem;">Ética Profesional del <span style="color:var(--primary)">Auditor</span></h1>
+                
+                <div class="features-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div class="feature-card animate-up delay-2">
+                        <h4 style="color:var(--primary); margin-bottom: 0.3rem; font-size: 0.9rem;"><i class="fas fa-balance-scale"></i> Integridad</h4>
+                        <p style="font-size: 0.75rem; line-height: 1.3;">Rectitud y honestidad absoluta tanto en el informe como en el <b>proceso de campo</b>.</p>
+                    </div>
+                    <div class="feature-card animate-up delay-3">
+                        <h4 style="color:var(--primary); margin-bottom: 0.3rem; font-size: 0.9rem;"><i class="fas fa-bullseye"></i> Objetividad</h4>
+                        <p style="font-size: 0.75rem; line-height: 1.3;">Juicios sin emociones personales ni <b>conflictos de intereses</b> que nublen el examen.</p>
+                    </div>
+                    <div class="feature-card animate-up delay-4">
+                        <h4 style="color:var(--primary); margin-bottom: 0.3rem; font-size: 0.9rem;"><i class="fas fa-user-secret"></i> Confidencialidad</h4>
+                        <p style="font-size: 0.75rem; line-height: 1.3;">Respeto total por los datos sensibles para <b>proteger la privacidad de los auditados</b>.</p>
+                    </div>
+                    <div class="feature-card animate-up delay-5">
+                        <h4 style="color:var(--primary); margin-bottom: 0.3rem; font-size: 0.9rem;"><i class="fas fa-user-gear"></i> Competencia</h4>
+                        <p style="font-size: 0.75rem; line-height: 1.3;">Conocimiento técnico actualizado bajo normativas de control nacional.</p>
+                    </div>
+                    <div class="feature-card animate-up delay-1" style="grid-column: span 2;">
+                        <h4 style="color:var(--primary); margin-bottom: 0.3rem; font-size: 0.9rem;"><i class="fas fa-handshake"></i> Relaciones Interpersonales</h4>
+                        <p style="font-size: 0.75rem; line-height: 1.3;"><b>Empatía</b> y comunicación asertiva para lograr una fiscalización colaborativa y profesional.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: IMPORTANCIA -->
+        <section class="slide" id="slide-4">
+            <div class="content-box">
+                <div class="accent-bar animate-up"></div>
+                <h2 class="slide-subtitle animate-up delay-1">¿Por qué es fundamental?</h2>
+                <h1 class="slide-title animate-up delay-2" style="font-size: 2.8rem;">Impacto en la <span style="color:var(--primary)">Credibilidad</span></h1>
+                
+                <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+                    <div class="feature-card animate-up delay-3" style="flex: 1; border-left: 2px solid var(--primary);">
+                        <p class="text-body" style="font-size: 1.1rem; color: #fff;">
+                            "Sostiene la confianza ciudadana y evita la desorganización institucional en entidades como <strong>Tupak Rantina</strong>."
+                        </p>
+                    </div>
+                    <div class="feature-card animate-up delay-4" style="flex: 1; border-left: 2px solid var(--primary);">
+                        <p class="text-body" style="font-size: 1.1rem; color: #fff;">
+                            "Actúa como el puente que conecta la gestión gerencial con la transparencia ante los socios."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: CASO PRÁCTICO -->
+        <section class="slide" id="slide-5">
+            <div class="content-box">
+                <div class="accent-bar animate-up"></div>
+                <h2 class="slide-subtitle animate-up delay-1">Contexto Real: Machachi</h2>
+                <h1 class="slide-title animate-up delay-2" style="font-size: 2.8rem;">Caso <span style="color:var(--primary)">Tupak Rantina</span></h1>
+                
+                <div class="feature-card animate-up delay-3" style="margin-bottom: 1rem; padding: 1.5rem;">
+                    <h4 style="color: var(--primary);"><i class="fas fa-circle-check"></i> El Auditor Ético</h4>
+                    <p style="font-size: 0.9rem;">Detecta errores en intereses de directivos y reporta sin miedo a represalias, priorizando la honestidad pública.</p>
+                </div>
+
+                <div class="feature-card animate-up delay-4" style="border-left-color: #555; padding: 1.5rem;">
+                    <h4 style="color: #888;"><i class="fas fa-circle-xmark"></i> El Riesgo Ético</h4>
+                    <p style="font-size: 0.9rem;">Aceptar beneficios en comercios (Ferresoluciones) a cambio de suavizar reportes. Resultado: Pérdida de licencia y descrédito.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: CONCLUSIÓN -->
+        <section class="slide" id="slide-6">
+            <div class="content-box" style="text-align: center;">
+                <h1 class="slide-title animate-up" style="font-size: 4rem;">La ética es la <br><span style="color:var(--primary)">columna vertebral</span> de la confianza</h1>
+                <p class="text-body animate-up delay-1" style="margin: 2rem auto; max-width: 800px;">
+                    "Un auditor íntegro no solo valida cifras, sino que garantiza la transparencia y la sostenibilidad de cualquier institución ante la sociedad."
+                </p>
+                <div class="accent-bar animate-up delay-2" style="margin: 2rem auto;"></div>
+                <p class="animate-up delay-2" style="font-weight: bold; letter-spacing: 5px; color: var(--primary);">FIN DE LA EXPOSICIÓN</p>
+            </div>
+        </section>
+
+        <!-- SLIDE FINAL: ENDING SCREEN -->
+        <section class="slide" id="ending-screen">
+            <div class="content-box" style="text-align: center;">
+                <div class="accent-bar animate-up" style="margin: 0 auto 20px;"></div>
+                <h2 class="slide-subtitle animate-up">Tarea Completada</h2>
+                <h1 class="slide-title animate-up delay-1">EVALUACIÓN PRÁCTICA</h1>
+                
+                <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px; flex-wrap: wrap;" class="animate-up delay-2">
+                    <a href="../Pdfs/EVALUACION_PRACTICA.html" class="nav-btn" style="width: auto; height: auto; padding: 12px 25px; border-radius: 30px; font-size: 1rem; text-decoration: none;" title="Ver Documento PDF">
+                        <i class="far fa-file-pdf" style="margin-right: 10px;"></i> Ver PDF de esta tarea
+                    </a>
+                    <a href="../../../index.html?subject=auditoria" class="nav-btn" style="width: auto; height: auto; padding: 12px 25px; border-radius: 30px; font-size: 1rem; text-decoration: none;" title="Ver otros trabajos">
+                        <i class="fas fa-th-list" style="margin-right: 10px;"></i> Ver Otros Deberes
+                    </a>
+                </div>
+
+                <p class="animate-up delay-3" style="margin-top: 50px; opacity: 0.6; font-size: 0.9rem;">
+                    Portafolio Académico - Luis Pinta &copy; 2026
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Controles -->
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSlide()" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+        <button class="nav-btn" onclick="nextSlide()" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <div class="progress-bar" id="progBar"></div>
+
+    <script>
+        const AUTH_KEY = '1727652107';
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progBar = document.getElementById('progBar');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Si estamos en el ending-screen, ocultar barra de progreso
+            const isEnding = currentSlide === slides.length - 1;
+            const progress = ((currentSlide + 1) / (slides.length - 1)) * 100;
+            progBar.style.width = isEnding ? '0%' : Math.min(progress, 100) + '%';
+            progBar.style.opacity = isEnding ? '0' : '1';
+
+            document.getElementById('prevBtn').style.opacity = currentSlide === 0 ? '0.3' : '1';
+            document.getElementById('nextBtn').style.opacity = isEnding ? '0' : '1';
+            document.getElementById('nextBtn').style.pointerEvents = isEnding ? 'none' : 'auto';
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        updateSlide();
+
+        // --- DOT SHADER BACKGROUND (PORTED FROM REACT) ---
+        (function initDotShader() {
+            const canvas = document.getElementById('dotShaderCanvas');
+            if (!canvas) return;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            
+            const uniforms = {
+                time: { value: 0 },
+                resolution: { value: new THREE.Vector2() },
+                dotColor: { value: new THREE.Color('#FFFFFF') },
+                bgColor: { value: new THREE.Color('#121212') },
+                gridSize: { value: 60.0 },
+                dotOpacity: { value: 0.08 }
+            };
+
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                uniform float time;
+                uniform vec2 resolution;
+                uniform vec3 dotColor;
+                uniform vec3 bgColor;
+                uniform float gridSize;
+                uniform float dotOpacity;
+                varying vec2 vUv;
+
+                // Función pseudo-aleatoria
+                float random(vec2 st) {
+                    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+                }
+
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / resolution.xy;
+                    
+                    // Ciclo total de 12 segundos (5s de "ola", 7s de espera)
+                    float cycle = mod(time, 12.0);
+                    
+                    // Definimos la "ola" que cruza la pantalla de izquierda a derecha
+                    // El valor 5.0 controla la duración del paso de la ola
+                    float wavePos = (cycle / 5.0) * 2.5 - 0.75; 
+                    float waveMask = smoothstep(0.4, 0.0, abs(uv.x - wavePos));
+                    
+                    // Si estamos fuera del tiempo de la ola (primeros 5s), ocultar
+                    if (cycle > 5.0) waveMask = 0.0;
+
+                    // Crear partículas/destellos aleatorios
+                    vec2 grid = floor(gl_FragCoord.xy / 8.0); 
+                    float rand = random(grid);
+                    
+                    // Solo activar algunos puntos como destellos
+                    float sparkle = 0.0;
+                    if (rand > 0.98) {
+                        float twinkle = sin(time * 5.0 + rand * 10.0) * 0.5 + 0.5;
+                        vec2 subUv = fract(gl_FragCoord.xy / 8.0) - 0.5;
+                        float dist = length(subUv);
+                        sparkle = smoothstep(0.15, 0.0, dist) * twinkle;
+                    }
+
+                    float alpha = sparkle * waveMask * 0.6;
+                    vec3 color = mix(bgColor, dotColor, alpha);
+                    
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `;
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const material = new THREE.ShaderMaterial({
+                uniforms,
+                vertexShader,
+                fragmentShader,
+                transparent: true
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            // Reiniciar animación al cambiar de diapositiva
+            function checkSlideChange() {
+                uniforms.time.value = 0; // Reiniciar tiempo del shader para que la ola empiece de nuevo
+            }
+            
+            // Observar cambios en el contenedor de diapositivas para detectar navegación
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class' && mutation.target.classList.contains('active')) {
+                        checkSlideChange();
+                    }
+                });
+            });
+
+            slides.forEach(slide => {
+                observer.observe(slide, { attributes: true });
+            });
+
+            function resize() {
+                const w = canvas.clientWidth;
+                const h = canvas.clientHeight;
+                renderer.setSize(w, h, false);
+                uniforms.resolution.value.set(w, h);
+            }
+
+            window.addEventListener('resize', resize);
+
+            function animate(t) {
+                requestAnimationFrame(animate);
+                uniforms.time.value = t / 1000;
+                renderer.render(scene, camera);
+            }
+
+            resize();
+            animate(0);
+        })();
+    </script>
+</body>
+</html>

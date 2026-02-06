@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca de Tareas - Luis Pinta</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #16275e;
+            --secondary-color: #9a7c00;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --text-muted: #666;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- Sidebar & Navigation --- */
+        nav {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        nav h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transition: var(--transition);
+        }
+
+        .search-container input:focus {
+            background: white;
+            color: var(--text-main);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* --- Header / Hero Re-diseñado --- */
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a2a4e 100%);
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .header-top {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .instituto-logo-pills {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .instituto-logo {
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .header-info {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+        }
+
+        .header-titles h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+
+        .header-titles p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 5px 0 0 0;
+        }
+
+        .header-nav-inline {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Botones de carpeta estilizados para el header */
+        .btn-nav-header {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav-header:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-nav-header.active {
+            background: white;
+            color: var(--primary-color);
+            font-weight: bold;
+            border-color: white;
+        }
+
+        /* --- Loader Corporativo --- */
+        #loader, .page-loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader-logo {
+            height: 40px;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        /* --- Main Content --- */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem 1.5rem;
+            min-height: calc(100vh - 300px); /* Para empujar el powered by */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #fileLibrary {
+            flex-grow: 1;
+        }
+
+        /* --- Grid & Cards --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid #eee;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            position: relative; /* Añadido para posicionar botones internos */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+            opacity: 1; /* Asegura visibilidad constante */
+        }
+
+        .btn-action {
+            width: 35px; /* Ligeramente más grande para táctil */
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            background: white; /* Fondo sólido para visibilidad */
+            color: #ff4757; /* Color rojo de una vez para identificar acción */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-action:hover {
+            background: #ff4757;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .card-icon {
+            height: 120px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: #f8f9fa;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .card:hover .card-icon {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .card-info {
+            padding: 1.2rem;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .card-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .tag-pdf { background: #ffe3e3; color: #ff0000; }
+        .tag-slide { background: #e3f2fd; color: #1976d2; }
+        .tag-subject { background: #fff8e1; color: #ffa000; }
+
+        /* --- Subject Navigation --- */
+        .folder-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .folder-nav::-webkit-scrollbar { display: none; }
+
+        .btn-folder {
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .btn-folder.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* --- Toast Notification --- */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #16275e;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        #toast i {
+            font-size: 1.2rem;
+            color: #ff9f43;
+        }
+
+        #toast-lps {
+            height: 20px;
+            margin-left: 10px;
+            border-left: 1px solid rgba(255,255,255,0.3);
+            padding-left: 10px;
+        }
+
+        .btn-folder:hover:not(.active) {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        /* --- Classification Pills --- */
+        .class-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            justify-content: flex-start;
+        }
+
+        .pill {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: #eee;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .pill.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid #eee;
+            padding-top: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* --- Responsive View --- */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .search-container {
+                max-width: 100%;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            header {
+                padding: 2rem 1rem;
+            }
+        }
+
+        /* --- Empty State --- */
+        .empty-msg {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* --- Modal Personalizado --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .modal-text {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-confirm {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #eee;
+            color: var(--text-muted);
+        }
+
+        .btn-modal:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        /* --- Seguridad y Login --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            color: white;
+            text-align: center;
+        }
+
+        .login-box {
+            background: rgba(255,255,255,0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 10px;
+            border: none;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+        }
+
+        .btn-login {
+            background: var(--secondary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .btn-login:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .restricted-msg {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 30000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #ff4757;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* --- Footer / Powered By --- */
+        .powered-by {
+            text-align: center;
+            padding: 4rem 1rem 2rem 1rem;
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .powered-text {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: #999;
+            font-weight: bold;
+        }
+
+        .lps-logo {
+            height: 25px;
+            filter: grayscale(100%);
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        .lps-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- Loader de Entrada -->
+    <div id="loader">
+        <span class="powered-text" style="color: #666; font-size: 0.7rem; letter-spacing: 2px;">PREPARANDO PORTAFOLIO</span>
+        <img src="img/lpsolutionsblack.webp" alt="LPS" class="loader-logo">
+    </div>
+
+    <!-- Loader de Navegación (para tareas) -->
+    <div id="navLoader" class="page-loader" style="display: none; opacity: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+        <span id="navLoaderText" class="powered-text" style="color: #16275e; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">CARGANDO TAREA...</span>
+        <img src="img/lpsolutionsblack.webp" alt="LPS" class="loader-logo">
+    </div>
+
+    <!-- Overlay de Restricción -->
+    <div id="restrictedView" class="restricted-msg">
+        <i class="fas fa-user-shield fa-5x" style="margin-bottom: 2rem;"></i>
+        <h1>ACCESO RESTRINGIDO</h1>
+        <p>No tienes permisos de propietario para visualizar este contenido o abrir herramientas de desarrollador.</p>
+        <button onclick="location.reload()" class="btn-modal btn-cancel" style="margin-top: 1rem;">Reintentar</button>
+    </div>
+
+    <!-- Login/Clave del Autor -->
+    <div id="loginOverlay" style="display: none;">
+        <div class="login-box">
+            <i class="fas fa-lock fa-3x" style="margin-bottom: 1rem;"></i>
+            <h2>Clave del Autor</h2>
+            <p>Ingresa el código único para acceder al panel de administración.</p>
+            <input type="password" id="authKeyInput" placeholder="••••••••">
+            <button class="btn-login" onclick="validateKey()">Acceder</button>
+            <div class="powered-by" style="margin-top: 2rem; padding: 0; opacity: 0.6;">
+                <span class="powered-text" style="color: #fff; font-size: 0.6rem;">POWERED BY</span>
+                <img src="img/lpsolutionswithe.webp" alt="LPSolutions" class="lps-logo" style="height: 18px;">
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-top">
+            <div class="header-brand">
+                <div class="instituto-logo-pills">
+                    <img src="img/logo instituto.png" alt="Instituto" class="instituto-logo">
+                </div>
+                <h1 id="navTitle" style="font-size: 1.2rem; margin: 0; font-weight: 600;"><i class="fas fa-graduation-cap"></i> Portafolio</h1>
+            </div>
+            
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="¿Qué tarea buscas?" onkeyup="filterFiles()">
+            </div>
+        </div>
+
+        <div class="header-info">
+            <div class="header-titles">
+                <h2 id="headerTitle">TAREAS DE LUIS PINTA</h2>
+                <p id="headerSubtitle">Ciclo Académico 2026 | Carrera de Contabilidad</p>
+            </div>
+
+            <div class="header-nav-inline" id="subjectNav">
+                <button class="btn-nav-header active" onclick="filterBySubject('all')">
+                    <i class="fas fa-th-large"></i> Ver Todo
+                </button>
+                <button class="btn-nav-header" onclick="filterBySubject('auditoria')">
+                    <i class="fas fa-book"></i> Auditoría
+                </button>
+                <button class="btn-nav-header" onclick="filterBySubject('miscelaneo')">
+                    <i class="fas fa-info-circle"></i> Otros
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Clasificaciones secundarias -->
+        <div class="class-pills" id="typeFilters" style="margin-top: -1rem; margin-bottom: 2rem; justify-content: flex-start;">
+            <button class="pill active" onclick="filterByType('all')">Todos los formatos</button>
+            <button class="pill" onclick="filterByType('pdf')"><i class="far fa-file-pdf"></i> Documentos PDF</button>
+            <button class="pill" onclick="filterByType('slide')"><i class="far fa-images"></i> Presentaciones</button>
+        </div>
+
+        <div id="fileLibrary">
+            <!-- SECCIÓN: AUDITORÍA -->
+            <div class="subject-section" data-subject="auditoria">
+                <h2 class="section-title"><i class="fas fa-folder-open"></i> Auditoría (Cuarto Intensivo)</h2>
+                <div class="grid">
+                    
+                    <!-- PDF: Evaluación Práctica -->
+                    <div class="card file-item" data-id="eval-pdf" data-subject="auditoria" data-type="pdf" data-title="Evaluación Práctica - Auditoría">
+                        <div class="card-header-actions">
+                            <button class="btn-action owner-only" onclick="shareItem('MATERIAS/AUDITORIA/Pdfs/EVALUACION_PRACTICA.html', event)" title="Compartir enlace público" style="color: #2ecc71;">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="btn-action owner-only" onclick="showConfirm('eval-pdf', event)" title="Eliminar de la vista">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <a href="MATERIAS/AUDITORIA/Pdfs/EVALUACION_PRACTICA.html" class="item-link">
+                            <div class="card-icon">
+                                <i class="far fa-file-pdf"></i>
+                            </div>
+                            <div class="card-info">
+                                <span class="card-tag tag-pdf">Documento PDF</span>
+                                <div class="card-title">Evaluación Práctica: Procesos de Auditoría y ÉTICA del Auditor</div>
+                                <div class="card-meta">
+                                    <span><i class="far fa-calendar-alt"></i> Feb 2026</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> Machachi</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- PRESENTACIÓN: Evaluación Práctica -->
+                    <div class="card file-item" data-id="eval-ppt" data-subject="auditoria" data-type="slide" data-title="Exposición Auditoría">
+                        <div class="card-header-actions">
+                            <button class="btn-action owner-only" onclick="shareItem('MATERIAS/AUDITORIA/Presentaciones/EVALUACION_PRACTICA.html', event)" title="Compartir enlace público" style="color: #2ecc71;">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="btn-action owner-only" onclick="showConfirm('eval-ppt', event)" title="Eliminar de la vista">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <a href="MATERIAS/AUDITORIA/Presentaciones/EVALUACION_PRACTICA.html" class="item-link">
+                            <div class="card-icon">
+                                <i class="far fa-images"></i>
+                            </div>
+                            <div class="card-info">
+                                <span class="card-tag tag-slide">Presentación Interactiva</span>
+                                <div class="card-title">Exposición: Auditoría y Ética Profesional (Caso Tupak Rantina)</div>
+                                <div class="card-meta">
+                                    <span><i class="fas fa-play"></i> Iniciar</span>
+                                    <span><i class="far fa-clock"></i> 6 Slides + Final</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+
+                </div>
+            </div>
+
+            <div class="subject-section" data-subject="miscelaneo">
+                <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Otros Recursos</h2>
+                <div class="grid">
+                    <div class="card file-item" data-id="portfolio-info" data-subject="miscelaneo" data-type="pdf">
+                        <div class="card-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-tag tag-subject">Información</span>
+                            <div class="card-title">Portafolio Digital Académico - Luis Pinta</div>
+                            <div class="card-meta">
+                                <span><i class="fas fa-info-circle"></i> Estudiante: Luis Pinta</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POWERED BY LPSOLUTIONS - Fuera del grid para que no salte -->
+        <div class="powered-by">
+            <span class="powered-text">POWERED BY</span>
+            <img src="img/lpsolutionsblack.webp" alt="LPSolutions" class="lps-logo">
+        </div>
+    </main>
+
+    <!-- HTML DEL MODAL -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <h3 class="modal-title">¿Eliminar tarea?</h3>
+            <p class="modal-text">Esta acción ocultará el archivo de la biblioteca. No se borrará el archivo real en tu computadora.</p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button id="confirmDeleteBtn" class="btn-modal btn-confirm">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST PERSONALIZADO -->
+    <div id="toast">
+        <i id="toast-icon" class="fas fa-info-circle"></i>
+        <span id="toast-message"></span>
+        <img src="img/lpsolutionswithe.webp" alt="LPS" id="toast-lps">
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                // Temporizador de 1200ms para el loader inicial
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }, 1200);
+            }
+        });
+
+        // Función personalizada para notificaciones
+        function showToast(message, icon = 'fa-info-circle') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            
+            msgEl.textContent = message;
+            iconEl.className = `fas ${icon}`;
+            
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Interceptor de enlaces para el loader de tareas (1500ms)
+        document.querySelectorAll('.item-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && !href.startsWith('#')) {
+                        e.preventDefault();
+                        
+                        // Extraer título para el loader
+                        const cardTitle = this.querySelector('.card-title')?.textContent || 'Tarea';
+                        const navLoader = document.getElementById('navLoader');
+                        const navLoaderText = document.getElementById('navLoaderText');
+                        
+                        if (navLoader && navLoaderText) {
+                            navLoaderText.textContent = `CARGANDO: ${cardTitle}`;
+                            navLoader.style.display = 'flex';
+                            setTimeout(() => navLoader.style.opacity = '1', 10);
+
+                            // Navegar después de 1500ms
+                            setTimeout(() => {
+                                window.location.href = href;
+                            }, 1500);
+                        } else {
+                            window.location.href = href;
+                        }
+                    }
+                });
+            });
+
+        const AUTH_KEY = '1727652107';
+        let currentFileToDelete = null;
+        let activeSubject = 'all';
+        let activeType = 'all';
+        let isViewBlocked = false;
+
+        // --- SISTEMA DE SEGURIDAD Y FILTRO DINÁMICO ---
+        (function initialSetup() {
+            const params = new URLSearchParams(window.location.search);
+            const isOwnerParam = params.get('owner') === AUTH_KEY;
+            const isOwnerSession = sessionStorage.getItem('isOwner') === 'true';
+            const subjectParam = params.get('subject');
+            const forceOwner = params.get('owner') === 'true';
+
+            // Bloqueo si no hay parámetro de subject (a menos que sea owner)
+            if (!subjectParam && !forceOwner) {
+                isViewBlocked = true;
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.body.innerHTML = `
+                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #16275e 0%, #0a1433 100%); color:white; text-align:center; padding: 20px;">
+                            <i class="fas fa-ghost" style="font-size: 5rem; margin-bottom: 2rem; opacity: 0.3;"></i>
+                            <h1 style="font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin:0;">Nada que ver aquí</h1>
+                            <p style="opacity: 0.6; margin-top: 15px; font-weight: 300;">Acceso restringido o recurso no especificado.</p>
+                            <div style="position: absolute; bottom: 40px; display: flex; flex-direction: column; align-items: center; opacity: 0.8;">
+                                <span style="font-size: 0.7rem; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase;">Powered by</span>
+                                <img src="img/lpsolutionswithe.webp" alt="LPSolutions" style="height: 35px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));">
+                            </div>
+                        </div>
+                    `;
+                });
+                return;
+            }
+
+            // 1. Manejo de Filtro por Materia (Modo Entrega Elegante)
+            if (subjectParam) {
+                const subject = subjectParam.toLowerCase();
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .subject-section:not([data-subject="${subject}"]) { display: none !important; }
+                    .header-nav-inline { display: none !important; }
+                    .owner-only { display: none !important; }
+                    .search-container { display: none !important; }
+                `;
+                document.head.appendChild(style);
+                
+                window.addEventListener('load', () => {
+                    const navTitle = document.getElementById('navTitle');
+                    const headerTitle = document.getElementById('headerTitle');
+                    const headerSubtitle = document.getElementById('headerSubtitle');
+                    
+                    if (navTitle) navTitle.innerHTML = `<i class="fas fa-book"></i> Materia: ${subjectParam.toUpperCase()}`;
+                    if (headerTitle) headerTitle.textContent = `TAREAS DE ${subjectParam.toUpperCase()} - LUIS PINTA`;
+                    if (headerSubtitle) headerSubtitle.textContent = `Visualización profesional de entregables académicos para ${subjectParam.toUpperCase()}`;
+                    
+                    document.getElementById('loginOverlay').style.display = 'none';
+                });
+                return; 
+            }
+
+            // 2. Manejo de Seguridad Estándar
+            if (!isOwnerParam && !isOwnerSession) {
+                // Modo Espectador / Bloqueado
+                document.addEventListener('contextmenu', e => e.preventDefault());
+                document.addEventListener('keydown', e => {
+                    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                        e.preventDefault();
+                        document.getElementById('restrictedView').style.display = 'flex';
+                        return false;
+                    }
+                });
+                
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .owner-only { display: none !important; }
+                    body { user-select: none !important; -webkit-user-select: none; }
+                `;
+                document.head.appendChild(style);
+
+                window.addEventListener('load', () => {
+                    document.getElementById('loginOverlay').style.display = 'flex';
+                });
+            } else {
+                sessionStorage.setItem('isOwner', 'true');
+            }
+        })();
+
+        function validateKey() {
+            const val = document.getElementById('authKeyInput').value;
+            if (val === AUTH_KEY) {
+                sessionStorage.setItem('isOwner', 'true');
+                const url = new URL(window.location.href);
+                url.searchParams.set('owner', AUTH_KEY);
+                window.location.href = url.href;
+            } else {
+                showToast('Clave incorrecta. Acceso denegado.', 'fa-exclamation-triangle');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isViewBlocked) return;
+            const isOwner = sessionStorage.getItem('isOwner') === 'true';
+            
+            if (isOwner) {
+                document.querySelectorAll('.item-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith('http')) {
+                        const url = new URL(href, window.location.origin + window.location.pathname);
+                        url.searchParams.set('owner', AUTH_KEY);
+                        link.setAttribute('href', url.pathname + url.search);
+                    }
+                });
+            }
+
+            const hiddenFiles = JSON.parse(localStorage.getItem('hiddenFiles') || '[]');
+            hiddenFiles.forEach(id => {
+                const el = document.querySelector(`[data-id="${id}"]`);
+                if (el) el.style.display = 'none';
+            });
+            updateView();
+        });
+
+        function shareItem(path, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const fullUrl = window.location.origin + window.location.pathname.replace('index.html', '') + path;
+            
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                showToast('Enlace copiado al portapapeles', 'fa-check-circle');
+            });
+        }
+
+        function filterBySubject(subject) {
+            activeSubject = subject;
+            document.querySelectorAll('.btn-nav-header').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${subject}'`));
+            });
+            updateView();
+        }
+
+        function filterByType(type) {
+            activeType = type;
+            document.querySelectorAll('.pill').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${type}'`));
+            });
+            updateView();
+        }
+
+        function updateView() {
+            const sections = document.querySelectorAll('.subject-section');
+            const hiddenFiles = JSON.parse(localStorage.getItem('hiddenFiles') || '[]');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            sections.forEach(section => {
+                const subject = section.getAttribute('data-subject');
+                const isSubjectMatch = (activeSubject === 'all' || activeSubject === subject);
+                
+                let hasVisibleItems = false;
+                const sectionItems = section.querySelectorAll('.file-item');
+                
+                sectionItems.forEach(item => {
+                    const type = item.getAttribute('data-type');
+                    const id = item.getAttribute('data-id');
+                    const title = (item.getAttribute('data-title') || item.innerText).toLowerCase();
+                    
+                    const isTypeMatch = (activeType === 'all' || activeType === type);
+                    const isSearchMatch = title.includes(searchTerm);
+                    const isNotHidden = !hiddenFiles.includes(id);
+
+                    if (isSubjectMatch && isTypeMatch && isSearchMatch && isNotHidden) {
+                        item.style.display = "flex";
+                        hasVisibleItems = true;
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+
+                section.style.display = hasVisibleItems ? "block" : "none";
+            });
+        }
+
+        function filterFiles() {
+            updateView();
+        }
+
+        function showConfirm(id, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            currentFileToDelete = id;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            
+            document.getElementById('confirmDeleteBtn').onclick = () => {
+                removeFile(currentFileToDelete);
+                closeModal();
+            };
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            currentFileToDelete = null;
+        }
+
+        function removeFile(id) {
+            const hiddenFiles = JSON.parse(localStorage.getItem('hiddenFiles') || '[]');
+            if (!hiddenFiles.includes(id)) {
+                hiddenFiles.push(id);
+                localStorage.setItem('hiddenFiles', JSON.stringify(hiddenFiles));
+            }
+            updateView();
+        }
+
+        window.onclick = function(event) {
+            const overlay = document.getElementById('modalOverlay');
+            if (event.target == overlay) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
