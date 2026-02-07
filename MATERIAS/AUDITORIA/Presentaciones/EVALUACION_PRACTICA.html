@@ -229,9 +229,151 @@
             .slide-title { font-size: 2.5rem; }
             .features-grid { grid-template-columns: 1fr; }
         }
+
+        /* --- Fullscreen Hiding --- */
+        body.is-fullscreen .home-btn,
+        body.is-fullscreen .controls {
+            display: none !important;
+        }
+
+        body.is-fullscreen {
+            cursor: none;
+        }
+
+        /* --- Indicadores de Navegación --- */
+        .nav-flash {
+            position: fixed;
+            top: 0;
+            height: 100vh;
+            width: 100px;
+            pointer-events: none;
+            z-index: 1500;
+            opacity: 0;
+            transition: none;
+        }
+
+        .nav-flash.right {
+            right: 0;
+            background: linear-gradient(to left, rgba(214, 48, 49, 0.4), transparent);
+        }
+
+        .nav-flash.left {
+            left: 0;
+            background: linear-gradient(to right, rgba(214, 48, 49, 0.4), transparent);
+        }
+
+        .nav-flash.animate {
+            animation: navFlashAnim 0.6s ease-out;
+        }
+
+        @keyframes navFlashAnim {
+            0% { opacity: 0; width: 0; }
+            30% { opacity: 1; width: 120px; }
+            100% { opacity: 0; width: 60px; }
+        }
+
+        /* --- Screenlocker --- */
+        #screenlocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 18, 18, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(25px);
+        }
+
+        #screenlocker.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .locker-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .locker-content {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 30px rgba(214, 48, 49, 0.8)); }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .locker-content i {
+            font-size: 10rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(214, 48, 49, 0.4));
+            animation: pulse-red 2s infinite ease-in-out;
+        }
+
+        .locker-content h2 {
+            font-size: 3.5rem;
+            color: var(--light);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+        }
+
+        .locker-content h2 span.highlight {
+            color: var(--primary);
+            position: relative;
+            text-decoration: none; /* Quitamos el subrayado estándar */
+        }
+
+        .locker-content h2 span.highlight::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            animation: underlineGrow 10s infinite ease-in-out;
+        }
+
+        @keyframes underlineGrow {
+            0%, 100% { width: 0; left: 0; }
+            45%, 55% { width: 100%; left: 0; }
+            95% { width: 0; left: 100%; }
+        }
     </style>
 </head>
 <body>
+    <div id="screenlocker">
+        <canvas class="locker-canvas" id="lockerShaderCanvas"></canvas>
+        <div class="locker-content animate__animated animate__zoomIn">
+            <i class="fa-solid fa-person-microphone"></i>
+            <h2>
+                INTERVENCIÓN <span class="highlight">PERSONAL</span>
+            </h2>
+        </div>
+    </div>
+
     <div class="bg-overlay"></div>
     <canvas id="dotShaderCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
     
@@ -415,6 +557,9 @@
 
     <div class="progress-bar" id="progBar"></div>
 
+    <div id="flash-left" class="nav-flash left"></div>
+    <div id="flash-right" class="nav-flash right"></div>
+
     <script>
         const AUTH_KEY = '1727652107';
         let currentSlide = 0;
@@ -437,10 +582,18 @@
             document.getElementById('nextBtn').style.pointerEvents = isEnding ? 'none' : 'auto';
         }
 
+        function triggerFlash(side) {
+            const flash = document.getElementById(`flash-${side}`);
+            flash.classList.remove('animate');
+            void flash.offsetWidth; // Trigger reflow
+            flash.classList.add('animate');
+        }
+
         function nextSlide() {
             if (currentSlide < slides.length - 1) {
                 currentSlide++;
                 updateSlide();
+                triggerFlash('right');
             }
         }
 
@@ -448,13 +601,40 @@
             if (currentSlide > 0) {
                 currentSlide--;
                 updateSlide();
+                triggerFlash('left');
             }
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
-            if (e.key === 'ArrowLeft') prevSlide();
+            // Screenlocker toggle with Tab
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.getElementById('screenlocker').classList.toggle('active');
+            }
+
+            // Don't navigate if screenlocker is active
+            if (document.getElementById('screenlocker').classList.contains('active')) return;
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
         });
+
+        // --- MANEJO DE PANTALLA COMPLETA ---
+        function detectFullscreen() {
+            // Verifica API estándar y también dimensiones de ventana para F11
+            const isFullscreen = document.fullscreenElement || 
+                                (window.innerHeight >= screen.height - 10 && window.innerWidth >= screen.width - 10);
+            
+            if (isFullscreen) {
+                document.body.classList.add('is-fullscreen');
+            } else {
+                document.body.classList.remove('is-fullscreen');
+            }
+        }
+
+        window.addEventListener('resize', detectFullscreen);
+        document.addEventListener('fullscreenchange', detectFullscreen);
+        detectFullscreen();
 
         updateSlide();
 
@@ -503,22 +683,17 @@
                 void main() {
                     vec2 uv = gl_FragCoord.xy / resolution.xy;
                     
-                    // Ciclo total de 12 segundos (5s de "ola", 7s de espera)
+                    // Ciclo total de 12 segundos para el fondo general (más lento)
                     float cycle = mod(time, 12.0);
                     
-                    // Definimos la "ola" que cruza la pantalla de izquierda a derecha
-                    // El valor 5.0 controla la duración del paso de la ola
                     float wavePos = (cycle / 5.0) * 2.5 - 0.75; 
                     float waveMask = smoothstep(0.4, 0.0, abs(uv.x - wavePos));
                     
-                    // Si estamos fuera del tiempo de la ola (primeros 5s), ocultar
                     if (cycle > 5.0) waveMask = 0.0;
 
-                    // Crear partículas/destellos aleatorios
                     vec2 grid = floor(gl_FragCoord.xy / 8.0); 
                     float rand = random(grid);
                     
-                    // Solo activar algunos puntos como destellos
                     float sparkle = 0.0;
                     if (rand > 0.98) {
                         float twinkle = sin(time * 5.0 + rand * 10.0) * 0.5 + 0.5;
@@ -527,7 +702,7 @@
                         sparkle = smoothstep(0.15, 0.0, dist) * twinkle;
                     }
 
-                    float alpha = sparkle * waveMask * 0.6;
+                    float alpha = sparkle * waveMask * 0.6; 
                     vec3 color = mix(bgColor, dotColor, alpha);
                     
                     gl_FragColor = vec4(color, 1.0);
@@ -576,6 +751,104 @@
                 requestAnimationFrame(animate);
                 uniforms.time.value = t / 1000;
                 renderer.render(scene, camera);
+            }
+
+            resize();
+            animate(0);
+        })();
+
+        // --- SECOND SHADER FOR SCREENLOCKER ---
+        (function initLockerShader() {
+            const canvas = document.getElementById('lockerShaderCanvas');
+            if (!canvas) return;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            
+            const uniforms = {
+                time: { value: 0 },
+                resolution: { value: new THREE.Vector2() },
+                dotColor: { value: new THREE.Color('#FFFFFF') },
+                bgColor: { value: new THREE.Color('#121212') }
+            };
+
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                uniform float time;
+                uniform vec2 resolution;
+                uniform vec3 dotColor;
+                uniform vec3 bgColor;
+                varying vec2 vUv;
+
+                float random(vec2 st) {
+                    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+                }
+
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / resolution.xy;
+                    
+                    // Ciclo más lento para que sea suave (5 segundos)
+                    float cycle = mod(time, 5.0);
+                    
+                    // Ola más ancha y suave
+                    float wavePos = (cycle / 4.0) * 3.0 - 1.0; 
+                    float waveMask = smoothstep(0.8, 0.0, abs(uv.x - wavePos));
+
+                    vec2 grid = floor(gl_FragCoord.xy / 8.0); 
+                    float rand = random(grid);
+                    
+                    float sparkle = 0.0;
+                    if (rand > 0.96) {
+                        // Twinkle más lento para suavidad
+                        float twinkle = sin(time * 4.0 + rand * 10.0) * 0.5 + 0.5;
+                        vec2 subUv = fract(gl_FragCoord.xy / 8.0) - 0.5;
+                        float dist = length(subUv);
+                        sparkle = smoothstep(0.25, 0.0, dist) * twinkle;
+                    }
+
+                    float alpha = sparkle * waveMask * 0.7; // Reducido opacidad máxima para suavidad
+                    vec3 finalColor = mix(dotColor, vec3(1.0, 0.4, 0.4), waveMask);
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `;
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const material = new THREE.ShaderMaterial({
+                uniforms,
+                vertexShader,
+                fragmentShader,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            function resize() {
+                const w = canvas.clientWidth;
+                const h = canvas.clientHeight;
+                renderer.setSize(w, h, false);
+                uniforms.resolution.value.set(w, h);
+            }
+
+            window.addEventListener('resize', resize);
+
+            function animate(t) {
+                requestAnimationFrame(animate);
+                if (document.getElementById('screenlocker').classList.contains('active')) {
+                    uniforms.time.value = t / 1000;
+                    renderer.render(scene, camera);
+                }
             }
 
             resize();
