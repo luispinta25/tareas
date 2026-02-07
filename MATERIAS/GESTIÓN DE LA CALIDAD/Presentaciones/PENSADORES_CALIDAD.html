@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grandes Pensadores de la Calidad - Luis Pinta</title>
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --accent: #2c3e50;
+            --gray: #f5f5f5;
+            --transition: all 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* --- Contenedor de Zoom --- */
+        .zoom-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1000px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(3) translateZ(500px); /* Efecto de inicio: muy cerca */
+            transition: var(--transition);
+            background: var(--bg);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateZ(0);
+        }
+
+        .slide.prev {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.1) translateZ(-500px); /* Se aleja al fondo */
+        }
+
+        /* --- Contenido de la Diapositiva --- */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            align-items: end; /* Alineamos al fondo para que las imágenes no floten */
+            max-width: 1200px;
+            width: 90%;
+            height: 100%;
+            gap: 4rem;
+        }
+
+        .image-side {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 100%;
+        }
+
+        .image-side img {
+            width: 100%;
+            max-height: 100vh; /* Ocupa todo el alto posible */
+            object-fit: contain;
+            filter: drop-shadow(20px 20px 60px rgba(0,0,0,0.05));
+            display: block;
+            transform: translateY(5px); /* Pequeño ajuste para asegurar que toque el suelo */
+        }
+
+        .text-side {
+            padding-right: 2rem;
+            padding-bottom: 20vh; /* Elevamos un poco más el texto */
+        }
+
+        /* --- Alternancia de Lado (Derecha/Izquierda) --- */
+        .content.reverse {
+            grid-template-columns: 1.2fr 1fr;
+        }
+
+        .content.reverse .image-side {
+            order: 2;
+        }
+
+        .content.reverse .text-side {
+            order: 1;
+            padding-right: 0;
+            padding-left: 2rem;
+            text-align: right;
+        }
+
+        .content.reverse .quote-box::before {
+            left: auto;
+            right: 20px;
+        }
+
+        .quote-box {
+            position: relative;
+            padding: 2rem;
+            background: var(--gray);
+            border-radius: 20px;
+            margin-top: 2rem;
+        }
+
+        .quote-box::before {
+            content: '“';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 5rem;
+            color: var(--accent);
+            opacity: 0.2;
+            font-family: 'Playfair Display', serif;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .year {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #666;
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .speech-bubble {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-style: italic;
+            color: #444;
+        }
+
+        /* --- Estilos para diapositivas de detalles --- */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        .detail-item {
+            background: var(--gray);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .fishbone-svg {
+            width: 100%;
+            max-width: 700px;
+            margin: 2rem auto;
+            display: block;
+        }
+
+        .trilogy-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .trilogy-card {
+            background: var(--gray);
+            padding: 2rem;
+            border-radius: 20px;
+            flex: 1;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .trilogy-card i {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        /* --- Controles --- */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        /* Ocultar cursor y controles en Fullscreen */
+        body.fullscreen-mode {
+            cursor: none;
+        }
+
+        body.fullscreen-mode .controls,
+        body.fullscreen-mode .home-link {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- Overlay de Intervención (Luis Pinta) --- */
+        .intervention-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(44, 62, 80, 0.98);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .intervention-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .intervention-content {
+            max-width: 800px;
+            transform: translateY(20px);
+            transition: 0.6s 0.2s;
+        }
+
+        .intervention-overlay.active .intervention-content {
+            transform: translateY(0);
+        }
+
+        .intervention-badge {
+            background: #9a7c00;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+
+        .intervention-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .intervention-footer {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            opacity: 0.5;
+        }
+
+        .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: var(--accent);
+            transition: 0.3s;
+            z-index: 1000;
+        }
+
+        .home-link {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            text-decoration: none;
+            color: #999;
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress" id="progress"></div>
+    <a href="../../../index.html" class="home-link">← Luis Pinta</a>
+
+    <!-- Overlay de Intervención -->
+    <div class="intervention-overlay" id="interventionOverlay">
+        <div class="intervention-content">
+            <span class="intervention-badge" style="background: #e74c3c; font-weight: bold;">MODO CONFERENCISTA</span>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 4rem; margin-bottom: 1rem; color: #fff;">Intervención Personal</h2>
+            <div style="width: 80px; height: 4px; background: #9a7c00; margin: 0 auto 2rem auto;"></div>
+            <p class="intervention-text" id="interventionText" style="font-size: 1.8rem; opacity: 0.9;">
+                "Continuaremos en breve..."
+            </p>
+            <div class="intervention-footer" style="margin-top: 4rem; letter-spacing: 3px; font-weight: 300;">
+                LUIS PINTA | Machachi, Mejía
+                <br><br>
+                Presiona [TAB] para reanudar la presentación
+            </div>
+        </div>
+    </div>
+
+    <div class="zoom-container">
+        <!-- Slide 0: Portada -->
+        <div class="slide active">
+            <div style="text-align: center;">
+                <h1 style="font-size: 5rem;">Grandes Pensadores</h1>
+                <p style="font-size: 1.5rem; letter-spacing: 10px; text-transform: uppercase; margin-top: 1rem;">Gestión de la Calidad</p>
+                <div style="width: 100px; height: 2px; background: #000; margin: 2rem auto;"></div>
+                <p>Presentado por: Luis Armando Pinta Cajilema</p>
+            </div>
+        </div>
+
+        <!-- Slide 1: Deming (Izquierda) -->
+        <div class="slide">
+            <div class="content">
+                <div class="image-side">
+                    <img src="../Tareas por hacer/GRANDES PENSADORES/IMAGENES/DEMING.png" alt="W. Edwards Deming">
+                </div>
+                <div class="text-side">
+                    <h1>William Edwards Deming</h1>
+                    <span class="year">1900 – 1993</span>
+                    <div class="quote-box">
+                        <p class="speech-bubble">
+                            "En mi opinión, la calidad no es otra cosa que un sistema de mejora constante. Yo soy Edwards Deming y, a día de hoy, mi mayor legado es haber enseñado a la industria en Japón que la constancia en el propósito es la clave. He llegado a la conclusión de que sin datos, solo eres otra persona con una opinión; por ello, mis 14 puntos buscan transformar la gestión hacia un enfoque más humano y estadístico."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 1.1: Detalle Deming -->
+        <div class="slide">
+            <div style="max-width: 1000px; padding: 2rem;">
+                <h1 style="text-align: center; font-size: 2.5rem;">Los 14 Puntos de Deming</h1>
+                <p style="text-align: center; color: #666;">Transformación para la Eficiencia Organizacional</p>
+                <div class="details-grid">
+                    <div class="detail-item"><strong>1. Constancia:</strong> Propósito de mejora de productos y servicios.</div>
+                    <div class="detail-item"><strong>2. Nueva Filosofía:</strong> Adoptar el liderazgo para el cambio.</div>
+                    <div class="detail-item"><strong>3. Inspección:</strong> Dejar de depender de la inspección masiva.</div>
+                    <div class="detail-item"><strong>4. Compras:</strong> No comprar basándose solo en el precio.</div>
+                    <div class="detail-item"><strong>5. Mejora Continua:</strong> Mejorar el sistema de producción siempre.</div>
+                    <div class="detail-item"><strong>6. Entrenamiento:</strong> Instituir la capacitación en el trabajo.</div>
+                    <div class="detail-item"><strong>7. Liderazgo:</strong> Instituir directivos que ayuden a la gente.</div>
+                    <div class="detail-item"><strong>8. Sin Miedo:</strong> Eliminar el miedo para que todos trabajen mejor.</div>
+                    <div class="detail-item"><strong>9. Barreras:</strong> Derribar barreras entre departamentos.</div>
+                    <div class="detail-item"><strong>10. Slogans:</strong> Eliminar exhortaciones y metas numéricas.</div>
+                    <div class="detail-item"><strong>11. Cuotas:</strong> Eliminar estándares de trabajo y cuotas.</div>
+                    <div class="detail-item"><strong>12. Orgullo:</strong> Eliminar barreras al orgullo del trabajador.</div>
+                    <div class="detail-item"><strong>13. Educación:</strong> Fomentar la auto-superación de todos.</div>
+                    <div class="detail-item"><strong>14. Acción:</strong> Poner a todos a trabajar en la transformación.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Juran (Derecha) -->
+        <div class="slide">
+            <div class="content reverse">
+                <div class="image-side">
+                    <img src="../Tareas por hacer/GRANDES PENSADORES/IMAGENES/JURAN.png" alt="Joseph M. Juran">
+                </div>
+                <div class="text-side">
+                    <h1>Joseph M. Juran</h1>
+                    <span class="year">1904 – 2008</span>
+                    <div class="quote-box">
+                        <p class="speech-bubble">
+                            "Yo soy Joseph Juran. Siempre he pensado que la calidad debe ser administrada con la misma disciplina que el capital financiero. Mi 'Trilogía de la Calidad' —planificación, control y mejora— es el mapa que cualquier empresa, incluso nuestras ferreterías aquí en Mejía, debería seguir. He llegado a la conclusión de que el 85% de los problemas son responsabilidad de la gerencia, no de los trabajadores."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2.1: Detalle Juran -->
+        <div class="slide">
+            <div style="max-width: 1000px; width: 90%;">
+                <h1 style="text-align: center; margin-bottom: 3rem;">La Trilogía de Juran</h1>
+                <div class="trilogy-container">
+                    <div class="trilogy-card">
+                        <i class="fas fa-pencil-ruler"></i>
+                        <h3>Planificación</h3>
+                        <p>Establecer las metas de calidad y los procesos necesarios para cumplirlas.</p>
+                    </div>
+                    <div class="trilogy-card">
+                        <i class="fas fa-microscope"></i>
+                        <h3>Control</h3>
+                        <p>Evaluar el desempeño real y compararlo con las metas para actuar sobre la diferencia.</p>
+                    </div>
+                    <div class="trilogy-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Mejora</h3>
+                        <p>Elevar el desempeño de la calidad a niveles sin precedentes (ruptura).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Ishikawa (Izquierda) -->
+        <div class="slide">
+            <div class="content">
+                <div class="image-side">
+                    <img src="../Tareas por hacer/GRANDES PENSADORES/IMAGENES/ISHIKAWA.png" alt="Kaoru Ishikawa">
+                </div>
+                <div class="text-side">
+                    <h1>Kaoru Ishikawa</h1>
+                    <span class="year">1915 – 1989</span>
+                    <div class="quote-box">
+                        <p class="speech-bubble">
+                            "¿Cómo están? Yo soy Kaoru Ishikawa. En mi opinión, la calidad empieza con la educación y termina con la educación. Creé el diagrama de espina de pescado porque creo firmemente que todos los socios de una organización deben ser capaces de identificar las raíces de un problema. Mi filosofía se resume en que el próximo paso en el proceso es siempre nuestro cliente."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3.1: Detalle Ishikawa -->
+        <div class="slide">
+            <div style="max-width: 1000px; width: 90%; text-align: center;">
+                <h1>Diagrama Causa-Efecto (Espina de Pescado)</h1>
+                <p>Una herramienta para identificar, explorar y visualizar las causas de un problema.</p>
+                <svg class="fishbone-svg" viewBox="0 0 950 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Backbone -->
+                    <line x1="50" y1="200" x2="700" y2="200" stroke="#2c3e50" stroke-width="4" />
+                    <polygon points="700,185 750,200 700,215" fill="#2c3e50" />
+                    <text x="765" y="195" font-family="Montserrat" font-weight="bold" fill="#2c3e50">
+                        <tspan x="765" dy="0">EFECTO</tspan>
+                        <tspan x="765" dy="28">PROBLEMA</tspan>
+                    </text>
+                    
+                    <!-- Ribs (Top) -->
+                    <line x1="150" y1="200" x2="250" y2="50" stroke="#2c3e50" stroke-width="2" />
+                    <text x="210" y="40" font-family="Montserrat" font-size="14" fill="#666">MANO DE OBRA</text>
+                    
+                    <line x1="350" y1="200" x2="450" y2="50" stroke="#2c3e50" stroke-width="2" />
+                    <text x="410" y="40" font-family="Montserrat" font-size="14" fill="#666">MÁQUINAS</text>
+                    
+                    <line x1="550" y1="200" x2="650" y2="50" stroke="#2c3e50" stroke-width="2" />
+                    <text x="610" y="40" font-family="Montserrat" font-size="14" fill="#666">MÉTODOS</text>
+
+                    <!-- Ribs (Bottom) -->
+                    <line x1="150" y1="200" x2="250" y2="350" stroke="#2c3e50" stroke-width="2" />
+                    <text x="210" y="375" font-family="Montserrat" font-size="14" fill="#666">MATERIALES</text>
+                    
+                    <line x1="350" y1="200" x2="450" y2="350" stroke="#2c3e50" stroke-width="2" />
+                    <text x="410" y="375" font-family="Montserrat" font-size="14" fill="#666">MEDIDAS</text>
+                    
+                    <line x1="550" y1="200" x2="650" y2="350" stroke="#2c3e50" stroke-width="2" />
+                    <text x="610" y="375" font-family="Montserrat" font-size="14" fill="#666">MEDIO AMBIENTE</text>
+                </svg>
+                <div style="background: #fdf2e9; padding: 1rem; border-radius: 10px; display: inline-block; margin-top: 1rem;">
+                    <strong>Las 6 M's:</strong> El estándar para el análisis de raíces en la industria.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Crosby (Derecha) -->
+        <div class="slide">
+            <div class="content reverse">
+                <div class="image-side">
+                    <img src="../Tareas por hacer/GRANDES PENSADORES/IMAGENES/CROSBY.png" alt="Philip Crosby">
+                </div>
+                <div class="text-side">
+                    <h1>Philip B. Crosby</h1>
+                    <span class="year">1926 – 2001</span>
+                    <div class="quote-box">
+                        <p class="speech-bubble">
+                            "Yo soy Philip Crosby y mi mensaje es claro: la calidad no cuesta. A día de hoy, mantengo que 'hacerlo bien a la primera' es la única forma de ser rentables. He llegado a la conclusión de que la meta debe ser siempre 'Cero Defectos'. No es una frase bonita, es un estándar de desempeño. Si no nos comprometemos con la excelencia absoluta, solo estamos administrando el error."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4.1: Detalle Crosby -->
+        <div class="slide">
+            <div style="max-width: 900px; width: 90%;">
+                <h1 style="text-align: center; margin-bottom: 3rem;">Los 4 Absolutos de Crosby</h1>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 2rem; background: var(--gray); padding: 1.5rem; border-radius: 15px;">
+                        <span style="font-size: 2.5rem; font-weight: bold; color: var(--accent); opacity: 0.3;">01</span>
+                        <div>
+                            <strong>Definición:</strong>
+                            <p>La calidad es el cumplimiento de los requisitos, no la "bondad" o "elegancia".</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 2rem; background: var(--gray); padding: 1.5rem; border-radius: 15px;">
+                        <span style="font-size: 2.5rem; font-weight: bold; color: var(--accent); opacity: 0.3;">02</span>
+                        <div>
+                            <strong>Sistema:</strong>
+                            <p>El sistema para causar la calidad es la prevención, no la evaluación (inspección).</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 2rem; background: var(--gray); padding: 1.5rem; border-radius: 15px;">
+                        <span style="font-size: 2.5rem; font-weight: bold; color: var(--accent); opacity: 0.3;">03</span>
+                        <div>
+                            <strong>Estándar:</strong>
+                            <p>El estándar de desempeño es Cero Defectos (hacerlo bien a la primera).</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 2rem; background: var(--gray); padding: 1.5rem; border-radius: 15px;">
+                        <span style="font-size: 2.5rem; font-weight: bold; color: var(--accent); opacity: 0.3;">04</span>
+                        <div>
+                            <strong>Medición:</strong>
+                            <p>La medida de la calidad es el precio del incumplimiento (los costos del error).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Conclusión propia -->
+        <div class="slide">
+            <div style="max-width: 800px; text-align: center;">
+                <h1 style="margin-bottom: 2rem;">Reflexión de Luis Pinta</h1>
+                <p style="font-size: 1.4rem; line-height: 2; font-style: italic;">
+                    "Tras analizar a estos gigantes, he llegado a la conclusión de que la calidad no es un destino, sino un viaje continuo. En nuestras comunidades de Machachi, aplicar estos conceptos en la Caja de Ahorro Tupak Rantina nos permite no solo ser más eficientes, sino más justos con nuestros socios. En mi opinión, la calidad es el respeto que le mostramos a quien confía en nuestro trabajo."
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="prevSlide()">←</button>
+        <button class="btn" onclick="nextSlide()">→</button>
+    </div>
+
+    <script>
+        let current = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const interventionOverlay = document.getElementById('interventionOverlay');
+        const interventionText = document.getElementById('interventionText');
+        let isInterventionActive = false;
+
+        // Frases para la intervención de Luis Pinta
+        const interventionPhrases = [
+            "La calidad es el respeto que le mostramos a quien confía en nuestro trabajo.",
+            "En Machachi, aplicar estos conceptos nos permite ser más eficientes y justos.",
+            "Si no nos comprometemos con la excelencia absoluta, solo estamos administrando el error.",
+            "La mejora continua es una filosofía de vida, no solo una meta laboral.",
+            "En la Caja de Ahorro Tupak Rantina, el socio es el centro de todo proceso de calidad.",
+            "Identificar la raíz de un problema es el primer paso hacia la verdadera solución."
+        ];
+
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === current) {
+                    slide.classList.add('active');
+                } else if (index < current) {
+                    slide.classList.add('prev');
+                }
+            });
+            progress.style.width = ((current + 1) / slides.length) * 100 + '%';
+        }
+
+        function nextSlide() {
+            if (isInterventionActive) return;
+            if (current < slides.length - 1) {
+                current++;
+                updateSlides();
+            }
+        }
+
+        function prevSlide() {
+            if (isInterventionActive) return;
+            if (current > 0) {
+                current--;
+                updateSlides();
+            }
+        }
+
+        function toggleIntervention() {
+            isInterventionActive = !isInterventionActive;
+            if (isInterventionActive) {
+                interventionOverlay.classList.add('active');
+            } else {
+                interventionOverlay.classList.remove('active');
+            }
+        }
+
+        // Manejo de Fullscreen y visibilidad
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                document.body.classList.add('fullscreen-mode');
+            } else {
+                document.body.classList.remove('fullscreen-mode');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            // Tab para Intervención Personal
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                toggleIntervention();
+            }
+
+            if (isInterventionActive) return;
+
+            // Navegación
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            }
+            if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            }
+
+            // F para Fullscreen
+            if (e.key.toLowerCase() === 'f') {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
